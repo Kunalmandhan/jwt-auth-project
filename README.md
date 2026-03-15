@@ -334,4 +334,4 @@ jwt.secret=5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
 jwt.expiration=86400000   # 24 hours in milliseconds
 ```
 
-> ⚠️ In production: use a strong random secret (32+ bytes) stored in an environment variable, not in the properties file. Use a real database (PostgreSQL/MySQL) instead of H2.
+
