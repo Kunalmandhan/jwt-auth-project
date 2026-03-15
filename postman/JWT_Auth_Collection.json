@@ -1,0 +1,285 @@
+{
+  "info": {
+    "_postman_id": "jwt-auth-collection",
+    "name": "JWT Auth - Spring Boot",
+    "description": "Complete JWT Authentication flow: Register → Login → Access Protected Routes → Logout",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Public - No Token Required",
+      "item": [
+        {
+          "name": "GET /api/public/info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/public/info",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "public", "info"]
+            },
+            "description": "Public endpoint – no token required. Shows the service is running."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Auth",
+      "item": [
+        {
+          "name": "POST /api/auth/register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.token) {",
+                  "    pm.collectionVariables.set('token', json.data.token);",
+                  "    console.log('Token saved:', json.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newuser\",\n  \"password\": \"newpass123\",\n  \"email\": \"newuser@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new user. Token is auto-saved to collection variable."
+          }
+        },
+        {
+          "name": "POST /api/auth/login (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.token) {",
+                  "    pm.collectionVariables.set('token', json.data.token);",
+                  "    console.log('Token saved:', json.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login as admin. Token is auto-saved to collection variable."
+          }
+        },
+        {
+          "name": "POST /api/auth/login (user)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.data && json.data.token) {",
+                  "    pm.collectionVariables.set('token', json.data.token);",
+                  "    console.log('Token saved:', json.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"user\",\n  \"password\": \"user123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Login as regular user. Token is auto-saved to collection variable."
+          }
+        },
+        {
+          "name": "POST /api/auth/login (WRONG PASSWORD - 401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Demonstrates 401 response for wrong credentials."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Protected Routes",
+      "item": [
+        {
+          "name": "GET /api/protected/profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "description": "JWT token from login"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/protected/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "protected", "profile"]
+            },
+            "description": "Requires valid JWT. Returns the current user's profile."
+          }
+        },
+        {
+          "name": "GET /api/protected/dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/protected/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "protected", "dashboard"]
+            },
+            "description": "Requires valid JWT. Shows dashboard message."
+          }
+        },
+        {
+          "name": "GET /api/protected/profile (NO TOKEN - 403)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/protected/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "protected", "profile"]
+            },
+            "description": "No token provided. Should return 403 Forbidden."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Admin Routes",
+      "item": [
+        {
+          "name": "GET /api/admin/users (admin token)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "users"]
+            },
+            "description": "Admin-only route. Works with admin token, returns 403 with user token."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Logout",
+      "item": [
+        {
+          "name": "POST /api/auth/logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "logout"]
+            },
+            "description": "Blacklists the current token. After this, the token is invalid."
+          }
+        },
+        {
+          "name": "GET /api/protected/profile (AFTER LOGOUT - 401)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/protected/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "protected", "profile"]
+            },
+            "description": "Using the same token after logout. Should return 401 – token invalidated."
+          }
+        }
+      ]
+    }
+  ]
+}
